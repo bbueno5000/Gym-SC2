@@ -58,11 +58,11 @@ class SC2Env(gym.Env):
 
     def _get_action_space(self):
         # screen_shape = self.observation_spec["screen"][1:]
-        return spaces.Discrete(64 * 64 - 1)
+        return spaces.Discrete(64)
 
     def _get_observation_space(self):
         # screen_shape = (1, ) + self.observation_spec["screen"][1:]
-        return spaces.Box(0, _PLAYER_RELATIVE_SCALE, (1, 64, 64), np.float32)
+        return spaces.Box(-10, 10, (4096,))
 
     def _post_reset(self):
         obs, _, _, _ = self._safe_step([_SELECT_ARMY, _SELECT_ALL])
