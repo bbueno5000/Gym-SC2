@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import gym
+from gym import Env
 from gym import spaces
-import logging
-import numpy as np
+from logging import getLogger
+from logging import INFO
+from numpy import unravel_index
 from pysc2.env import sc2_env
 from pysc2.env.environment import StepType
 from pysc2.lib import actions
 from pysc2.lib import features
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = getLogger(__name__)
+logger.setLevel(INFO)
 
 _MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
 _NO_OP = actions.FUNCTIONS.no_op.id
@@ -32,11 +33,11 @@ _PLAYER_RELATIVE_SCALE = features.SCREEN_FEATURES.player_relative.scale
 _SELECT_ALL = [0]
 _SELECT_ARMY = actions.FUNCTIONS.select_army.id
 
-class SC2Env(gym.Env):
+class SC2Env(Env):
 
     metadata = {'render.modes': [None, 'human']}
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs):
         self._action_space = None
         self._episode = 0
         self._episode_reward = 0
@@ -44,11 +45,9 @@ class SC2Env(gym.Env):
         self._observation_space = None
         self._total_reward = 0
         self._kwargs = kwargs
-        self._kwargs['map_name'] = 'MoveToBeacon'
         self._kwargs['agent_interface_format'] = \
         sc2_env.AgentInterfaceFormat(
-            feature_dimensions=sc2_env.Dimensions(
-                screen=64, minimap=64))
+            sc2_env.Dimensions(64, 64))
         self._env = sc2_env.SC2Env(**self._kwargs)
 
     def _extract_observation(self, obs):
@@ -91,7 +90,7 @@ class SC2Env(gym.Env):
         if action < 0 or action > self.action_space.n:
             return [_NO_OP]
         # screen_shape = self.observation_spec["screen"][1:]
-        target = list(np.unravel_index(action, (64, 64)))
+        target = list(unravel_index(action, (64, 64)))
         return [_MOVE_SCREEN, _NOT_QUEUED, target]
 
     @property
